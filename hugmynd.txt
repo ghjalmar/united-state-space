@@ -1,0 +1,10 @@
+Forrit til að herma leik sem á að byggja á sjálfvirkri stýringu
+
+state space:
+[x, y] hnit
+v hraði, theta stefnuhorn
+a hröðun?
+
+input frá notanda: 
+gildi á PID/LQR stýringu?
+
