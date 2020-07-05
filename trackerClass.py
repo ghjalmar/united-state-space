@@ -14,13 +14,13 @@ class tracker:
         self.state_space[0] = self.state_space[0] + np.cos(reference[1])*reference[0]*self.dt
         self.state_space[1] = self.state_space[1] + np.sin(reference[1])*reference[0]*self.dt
         self.state_space[2] = self.state_space[2] + reference[0]
-        self.state_space[3] = self.state_space[3] + reference[1]
+        self.state_space[3] = (self.state_space[3] + reference[1])%(2*np.pi)
         self.dx = np.cos(reference[1]) * reference[0] * self.dt
 
     def calc_gain(self):
         # Calculate new gain.
         self.A = np.identity(2)
         self.B = np.identity(2)
-        self.Q = 0.01*np.identity(2)
-        self.R  = 10*np.identity(2)
+        self.Q = np.identity(2)
+        self.R = np.identity(2)
         self.K, _, _ = control.lqr(self.A, self.B, self.Q, self.R)
