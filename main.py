@@ -4,12 +4,16 @@ import trackerClass
 import time
 
 # Constant
-x_t = np.linspace(1, 7, 10)
-y_t = [2 for val in x_t]
+#x_t = np.linspace(1, 150, 300)
+#y_t = [2 for val in x_t]
+#v = 1.75
+#dt = 0.05
 
 # Sinus
-#x_t = np.linspace(0, np.pi/4, 100)
-#y_t = [1+np.sin(val) for val in x_t]
+x_t = np.linspace(0, 150, 300)
+y_t = [0.5+np.sin(0.04*val) for val in x_t]
+v = 0.06
+dt = 0.2
 #y2_t = [10*np.cos(val) for val in x_t]
 
 # Linear
@@ -39,12 +43,20 @@ def calc_theta(x_t, y_t, x_pos):
         temp_theta = np.arccos(delta_x / d)
     return d, temp_theta
 
+def turn_angle(delta_theta, ref_angle):
+    temp_theta = delta_theta - ref_angle
+    # if temp_theta < 0:
+    #    temp_theta = temp_theta + 2*np.pi
+    #temp_theta = temp_theta % (2 * np.pi)
+    if temp_theta > np.pi/2:
+        temp_theta = temp_theta - 2*np.pi
+    return temp_theta
 # Setting up the object
-obj = trackerClass.tracker()
+obj = trackerClass.tracker(0, 0,1, 0, dt)
 obj.calc_gain()
 
 # Initial reference
-r0 = np.array([[0.001], [0]])
+r0 = np.array([[v], [0]])
 r_i = r0
 
 # Arrays to store the location of the object that is tracking the reference
@@ -63,10 +75,7 @@ for i in range(1, len(x_t)):
     x_pos[1, i] = obj.state_space[1] # y
     temp_Kx = np.matmul(obj.K, r_i)
     d, delta_theta = calc_theta(x_t[i], y_t[i], x_pos[:,i])
-    temp_theta = delta_theta - obj.state_space[3]
-    if temp_theta < 0:
-        temp_theta = temp_theta + 2*np.pi
-    temp_theta = temp_theta%(2*np.pi)
+    temp_theta = turn_angle(delta_theta, obj.state_space[3])
     d_vec[0, i] = d
     print(f'd: {d}')
     print(f'temp theta: {temp_theta}')

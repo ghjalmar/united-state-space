@@ -3,7 +3,7 @@ import control
 
 class tracker:
     # Object that tracks the reference.
-    def __init__(self, x=0, y=0, v=1, theta=0, dt=1):
+    def __init__(self, x=0, y=0, v=1, theta=0, dt=0.1):
         self.dt = dt
         # State space consists of [x, y, v, theta]^T
         self.state_space = np.array([x, y, v, theta])
