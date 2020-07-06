@@ -3,28 +3,6 @@ import numpy as np
 import trackerClass
 import time
 
-# Constant
-#x_t = np.linspace(1, 150, 300)
-#y_t = [2 for val in x_t]
-#v = 1.75
-#dt = 0.05
-
-# Sinus
-x_t = np.linspace(0, 150, 300)
-y_t = [0.5+np.sin(0.04*val) for val in x_t]
-v = 0.06
-dt = 0.2
-#y2_t = [10*np.cos(val) for val in x_t]
-
-# Linear
-#x_t = np.linspace(1, 10, 10)
-#y_t = [2*val for val in x_t]
-
-p.plot(x_t, y_t)
-#p.plot(x_t, y2_t)
-
-#p.show()
-
 # Function declarations
 def calc_theta(x_t, y_t, x_pos):
     # Returns the distance to the reference and the angle shift needed to point directly at it.
@@ -51,20 +29,25 @@ def turn_angle(delta_theta, ref_angle):
     if temp_theta > np.pi/2:
         temp_theta = temp_theta - 2*np.pi
     return temp_theta
-# Setting up the object
-obj = trackerClass.tracker(0, 0,1, 0, dt)
+
+# Setting up the reference object
+ref = 'sinus'
+ref = trackerClass.reference(ref)
+
+# Setting up the tracking object
+obj = trackerClass.tracker(0, 0,1, 0, ref.dt)
 obj.calc_gain()
 
-# Initial reference
-r0 = np.array([[v], [0]])
+# Initial input (reference)
+r0 = np.array([[ref.v], [0]])
 r_i = r0
 
 # Arrays to store the location of the object that is tracking the reference
-x_pos = np.zeros((2, len(x_t)))
-d_vec = np.zeros((1, len(x_t)))
-theta_vec = np.zeros((1,len(x_t)))
+x_pos = np.zeros((2, len(ref.x_t)))
+d_vec = np.zeros((1, len(ref.x_t)))
+theta_vec = np.zeros((1,len(ref.x_t)))
 # Feedback loop
-for i in range(1, len(x_t)):
+for i in range(1, len(ref.x_t)):
     print(r_i)
     print('State space before update:')
     print(obj.state_space)
@@ -74,7 +57,7 @@ for i in range(1, len(x_t)):
     x_pos[0, i] = obj.state_space[0] # x
     x_pos[1, i] = obj.state_space[1] # y
     temp_Kx = np.matmul(obj.K, r_i)
-    d, delta_theta = calc_theta(x_t[i], y_t[i], x_pos[:,i])
+    d, delta_theta = calc_theta(ref.x_t[i], ref.y_t[i], x_pos[:,i])
     temp_theta = turn_angle(delta_theta, obj.state_space[3])
     d_vec[0, i] = d
     print(f'd: {d}')
@@ -83,6 +66,7 @@ for i in range(1, len(x_t)):
     #r_i = r_i - temp_Kx
     r_i[1] = temp_theta
 
+p.plot(ref.x_t, ref.y_t)
 p.plot(x_pos[0,:], x_pos[1,:], color='tab:red')
 p.legend(['reference', 'object'])
 p.show()
