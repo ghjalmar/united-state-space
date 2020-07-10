@@ -28,20 +28,26 @@ def turn_angle(delta_theta, ref_angle):
     # if temp_theta < 0:
     #    temp_theta = temp_theta + 2*np.pi
     #temp_theta = temp_theta % (2 * np.pi)
-    if temp_theta > np.pi/2:
+    if temp_theta > np.pi:
         temp_theta = temp_theta - 2*np.pi
+    elif temp_theta < -np.pi:
+        temp_theta = -(temp_theta - 2 * np.pi)
     return temp_theta
 
 # Setting up for simulation
 dt = 0.1
 
 # Setting up the reference object
-ref = 'sinus'
+n = 4
+ref_dict = {1:'constant', 2:'sinus', 3:'linear', 4:'exp'}
+K_dict = {1:8, 2:9.5, 3:11, 4:10}
+K = K_dict[n]
+ref = ref_dict[n]
 ref = trackerClass.reference(dt, ref)
 
 # Setting up the tracking object
-obj = trackerClass.tracker(ref.dt, 0, 0, 1, 0)
-obj.calc_gain()
+obj = trackerClass.tracker(ref.dt, 0, 0, 0, 0)
+#obj.calc_gain()
 
 # Initial input (reference)
 r0 = np.array([[ref.a[0]], [0]])
@@ -53,35 +59,27 @@ d_vec = np.zeros((1, len(ref.x_t)))
 theta_vec = np.zeros((2,len(ref.x_t)))
 # Feedback loop
 for i in range(1, len(ref.x_t)):
-    print(r_i)
-    print('State space before update:')
-    print(obj.state_space)
-    obj.update_pos(r_i)
-    print('State space after update:')
-    print(obj.state_space)
     x_pos[0, i] = obj.state_space[0] # x
     x_pos[1, i] = obj.state_space[1] # y
-    temp_Kx = np.matmul(obj.K, r_i)
-    d, delta_theta = calc_theta(ref.x_t[i], ref.y_t[i], x_pos[:,i])
+    d, delta_theta = calc_theta(ref.x_t[i-1], ref.y_t[i-1], x_pos[:,i-1])
     temp_theta = turn_angle(delta_theta, obj.state_space[3])
     d_vec[0, i] = d
-    print(f'd: {d}')
-    print(f'temp theta: {temp_theta}')
-    theta_vec[0,  i] = temp_theta
+    theta_vec[0, i] = temp_theta
     theta_vec[1, i] = obj.state_space[3]
-    #r_i = r_i - temp_Kx
-    r_i[0] = ref.a[i-1]
+    r_i[0] = ref.a[i-1]*K
     r_i[1] = temp_theta
+    obj.update_pos(r_i)
 
-p.plot(ref.x_t, ref.y_t)
+print(f'temp_theta[i:j]: {theta_vec[0,0:20]}')
+p.plot(ref.x_t, ref.y_t, color='tab:blue')
 p.plot(x_pos[0,:], x_pos[1,:], color='tab:red')
-p.legend(['reference', 'object'])
+p.plot(ref.x_t, theta_vec[1,:], color='tab:green')
+p.legend(['reference', 'object', 'heading of object'])
 p.show()
 p.figure()
-p.plot(theta_vec[0,:], color='tab:blue')
-p.plot(d_vec[0, 1:], color='tab:red')
-p.plot(theta_vec[1,:], color='tab:green')
-p.legend(['theta_vec', 'd_vec', 'heading of object'])
+p.plot(ref.x_t, theta_vec[0,:], color='tab:blue')
+p.plot(ref.x_t[1:], d_vec[0, 1:], color='tab:red')
+p.legend(['dTheta_vec', 'd vec'])
 p.show()
 
 #p.figure()
