@@ -4,7 +4,7 @@ import matplotlib.pyplot as p
 
 class tracker:
     # Object that tracks the reference.
-    def __init__(self, x=0, y=0, v=1, theta=0, dt=0.1):
+    def __init__(self, dt, x=0, y=0, v=1, theta=0):
         self.dt = dt
         # State space consists of [x, y, v, theta]^T
         self.state_space = np.array([x, y, v, theta])
@@ -37,34 +37,61 @@ class tracker:
         self.K, _, _ = control.lqr(self.A, self.B, self.Q, self.R)
 
 class reference:
-    def __init__(self, type='constant', plot=0):
+    def __init__(self, dt, type='constant', plot=0):
+        self.dt = dt
         if type == 'constant':
             self.init_constant()
         elif type == 'sinus':
             self.init_sinus()
         elif type == 'linear':
             self.init_linear()
+        elif type == 'exp':
+            self.init_exp()
 
         if plot:
             p.plot(self.x_t, self.y_t)
             p.show()
 
+    def __calc_velocity__(self):
+        d = np.sqrt(np.power(np.diff(self.x_t), 2) +
+                    np.power(np.diff(self.y_t), 2))
+        v = d/self.dt
+        ret_v = np.array(0)
+        ret_v = np.append(ret_v, v)
+        return ret_v
+
     def init_constant(self):
         # Constant
-        self.x_t = np.linspace(1, 150, 300)
-        self.y_t = [2 for val in self.x_t]
-        self.v = 1.75
-        self.dt = 0.05
+        x0 = 1
+        xn = 150
+        n = 300
+        self.x_t = np.linspace(x0, xn, n)
+        self.y_t = np.array([2 for val in self.x_t])
+        self.v = self.__calc_velocity__()
 
     def init_sinus(self):
         # Sinus
-        self.x_t = np.linspace(0, 150, 300)
-        self.y_t = [0.5 + np.sin(0.04 * val) for val in self.x_t]
-        self.v = 0.06
-        self.dt = 0.2
+        x0 = 1
+        xn = 150
+        n = 300
+        self.x_t = np.linspace(x0, xn, n)
+        self.y_t = np.array([2 + np.sin(0.04 * val) for val in self.x_t])
+        self.v = self.__calc_velocity__()
 
     def init_linear(self):
         # Linear
-        self.x_t = np.linspace(1, 10, 10)
-        self.y_t = [2*val for val in self.x_t]
+        x0 = 1
+        xn = 10
+        n = 10
+        self.x_t = np.linspace(x0, xn, n)
+        self.y_t = np.array([2*val for val in self.x_t])
+        self.v = self.__calc_velocity__()
 
+    def init_exp(self):
+        # Linear
+        x0 = 0
+        xn = 10
+        n = 100
+        self.x_t = np.linspace(x0, xn, n)
+        self.y_t = np.array([np.exp(val) for val in self.x_t])
+        self.v = self.__calc_velocity__()

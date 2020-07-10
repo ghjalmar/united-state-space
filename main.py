@@ -30,16 +30,19 @@ def turn_angle(delta_theta, ref_angle):
         temp_theta = temp_theta - 2*np.pi
     return temp_theta
 
+# Setting up for simulation
+dt = 0.1
+
 # Setting up the reference object
-ref = 'sinus'
-ref = trackerClass.reference(ref)
+ref = 'exp'
+ref = trackerClass.reference(dt, ref)
 
 # Setting up the tracking object
-obj = trackerClass.tracker(0, 0,1, 0, ref.dt)
+obj = trackerClass.tracker(ref.dt, 0, 0, 1, 0)
 obj.calc_gain()
 
 # Initial input (reference)
-r0 = np.array([[ref.v], [0]])
+r0 = np.array([[ref.v[0]], [0]])
 r_i = r0
 
 # Arrays to store the location of the object that is tracking the reference
@@ -64,6 +67,7 @@ for i in range(1, len(ref.x_t)):
     print(f'temp theta: {temp_theta}')
     theta_vec[0,  i] = temp_theta
     #r_i = r_i - temp_Kx
+    r_i[0] = ref.v[i-1]
     r_i[1] = temp_theta
 
 p.plot(ref.x_t, ref.y_t)
@@ -75,3 +79,8 @@ p.plot(theta_vec[0,:], color='tab:blue')
 p.plot(d_vec[0, 1:], color='tab:red')
 p.legend(['theta_vec', 'd_vec'])
 p.show()
+
+#p.figure()
+#p.plot(ref.v)
+#p.legend('ref v')
+#p.show()
