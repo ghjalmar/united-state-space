@@ -58,7 +58,10 @@ class reference:
         v = d/self.dt
         ret_v = np.array(0)
         ret_v = np.append(ret_v, v)
-        return ret_v
+        a = np.diff(ret_v)/self.dt
+        ret_a = np.array(0)
+        ret_a = np.append(ret_a, a)
+        return ret_v, ret_a
 
     def init_constant(self):
         # Constant
@@ -67,7 +70,7 @@ class reference:
         n = 300
         self.x_t = np.linspace(x0, xn, n)
         self.y_t = np.array([2 for val in self.x_t])
-        self.v = self.__calc_velocity__()
+        self.v, self.a = self.__calc_velocity__()
 
     def init_sinus(self):
         # Sinus
@@ -76,7 +79,7 @@ class reference:
         n = 300
         self.x_t = np.linspace(x0, xn, n)
         self.y_t = np.array([2 + np.sin(0.04 * val) for val in self.x_t])
-        self.v = self.__calc_velocity__()
+        self.v, self.a = self.__calc_velocity__()
 
     def init_linear(self):
         # Linear
@@ -85,7 +88,7 @@ class reference:
         n = 10
         self.x_t = np.linspace(x0, xn, n)
         self.y_t = np.array([2*val for val in self.x_t])
-        self.v = self.__calc_velocity__()
+        self.v, self.a = self.__calc_velocity__()
 
     def init_exp(self):
         # Linear
@@ -94,4 +97,4 @@ class reference:
         n = 100
         self.x_t = np.linspace(x0, xn, n)
         self.y_t = np.array([np.exp(val) for val in self.x_t])
-        self.v = self.__calc_velocity__()
+        self.v, self.a = self.__calc_velocity__()

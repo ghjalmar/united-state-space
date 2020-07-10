@@ -5,7 +5,8 @@ import time
 
 # Function declarations
 def calc_theta(x_t, y_t, x_pos):
-    # Returns the distance to the reference and the angle shift needed to point directly at it.
+    # Returns the distance to the reference and the angle shift needed to point directly at it, \
+    # assuming that the tracker object has 0 heading in world frame.
     delta_x = x_t - x_pos[0]
     delta_y = y_t - x_pos[1]
     d = np.sqrt(delta_x ** 2 + delta_y ** 2)
@@ -22,6 +23,7 @@ def calc_theta(x_t, y_t, x_pos):
     return d, temp_theta
 
 def turn_angle(delta_theta, ref_angle):
+    # Adjusting for the assumption of 0 heading in world frame
     temp_theta = delta_theta - ref_angle
     # if temp_theta < 0:
     #    temp_theta = temp_theta + 2*np.pi
@@ -34,7 +36,7 @@ def turn_angle(delta_theta, ref_angle):
 dt = 0.1
 
 # Setting up the reference object
-ref = 'exp'
+ref = 'sinus'
 ref = trackerClass.reference(dt, ref)
 
 # Setting up the tracking object
@@ -42,13 +44,13 @@ obj = trackerClass.tracker(ref.dt, 0, 0, 1, 0)
 obj.calc_gain()
 
 # Initial input (reference)
-r0 = np.array([[ref.v[0]], [0]])
+r0 = np.array([[ref.a[0]], [0]])
 r_i = r0
 
 # Arrays to store the location of the object that is tracking the reference
 x_pos = np.zeros((2, len(ref.x_t)))
 d_vec = np.zeros((1, len(ref.x_t)))
-theta_vec = np.zeros((1,len(ref.x_t)))
+theta_vec = np.zeros((2,len(ref.x_t)))
 # Feedback loop
 for i in range(1, len(ref.x_t)):
     print(r_i)
@@ -66,8 +68,9 @@ for i in range(1, len(ref.x_t)):
     print(f'd: {d}')
     print(f'temp theta: {temp_theta}')
     theta_vec[0,  i] = temp_theta
+    theta_vec[1, i] = obj.state_space[3]
     #r_i = r_i - temp_Kx
-    r_i[0] = ref.v[i-1]
+    r_i[0] = ref.a[i-1]
     r_i[1] = temp_theta
 
 p.plot(ref.x_t, ref.y_t)
@@ -77,7 +80,8 @@ p.show()
 p.figure()
 p.plot(theta_vec[0,:], color='tab:blue')
 p.plot(d_vec[0, 1:], color='tab:red')
-p.legend(['theta_vec', 'd_vec'])
+p.plot(theta_vec[1,:], color='tab:green')
+p.legend(['theta_vec', 'd_vec', 'heading of object'])
 p.show()
 
 #p.figure()
