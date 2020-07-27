@@ -38,9 +38,9 @@ def turn_angle(delta_theta, ref_angle):
 dt = 0.1
 
 # Setting up the reference object
-n = 2
+n = 1
 ref_dict = {1:'constant', 2:'sinus', 3:'linear', 4:'exp'}
-K_dict = {1:8, 2:9.5, 3:11, 4:10}
+K_dict = {1:8, 2:10, 3:11, 4:10}
 K = K_dict[n]
 ref = ref_dict[n]
 ref = trackerClass.reference(dt, ref)

@@ -82,7 +82,7 @@ class reference:
         xn = 150
         n = 3000
         self.x_t = np.linspace(x0, xn, n)
-        self.y_t = np.array([3*np.sin(2 * val) for val in self.x_t])
+        self.y_t = np.array([0.2*np.sin(0.4 * val) for val in self.x_t])
         self.v, self.a = self.__calc_velocity__()
 
     def init_linear(self):
